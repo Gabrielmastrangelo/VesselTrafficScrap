@@ -5,11 +5,16 @@ from zoneinfo import ZoneInfo  # Only in Python 3.9+
 import os
 from dotenv import load_dotenv
 
+# Get the directory where this script is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Path to .env file
+env_path = os.path.join(BASE_DIR, '.env')
+load_dotenv(env_path)  # Load .env from the script's directory
+
 url_login = "https://ppaportal.portlink.co/api/accounts/login"
 
 session = requests.Session()
-
-load_dotenv()  # loads variables from .env file
 
 payload = {
     "email": os.getenv('EMAIL'),
@@ -53,13 +58,14 @@ collected_data = {
 vancouver_time = datetime.now(ZoneInfo("America/Vancouver"))
 timestamp = vancouver_time.strftime('%Y-%m-%d_%H-%M-%S')
 
+# Path to data folder relative to the script
 filename = f"{timestamp}.json"
-file_path = os.path.join("data", filename)
+data_folder = os.path.join(BASE_DIR, "data")
+file_path = os.path.join(data_folder, filename)
 
-# Create a data folder if it doesn't exist
-if not os.path.exists('data'):
-    os.makedirs('data')
-    print("Created 'data' folder.")
+# Ensure data folder exists
+os.makedirs(data_folder, exist_ok=True)
+
 
 # Dump to file
 with open(file_path, 'w') as f:
