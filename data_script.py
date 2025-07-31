@@ -3,14 +3,17 @@ from datetime import datetime
 import requests
 from zoneinfo import ZoneInfo  # Only in Python 3.9+
 import os
+from dotenv import load_dotenv
 
 url_login = "https://ppaportal.portlink.co/api/accounts/login"
 
 session = requests.Session()
 
+load_dotenv()  # loads variables from .env file
+
 payload = {
-    "email": "dispatch.yvr@saamtowage.com",
-    "password": "Luto1529"
+    "email": os.getenv('EMAIL'),
+    "password": os.getenv('PASSWORD')
 }
 
 response = session.post(url_login, json=payload)
