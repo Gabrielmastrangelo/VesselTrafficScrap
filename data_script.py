@@ -53,6 +53,11 @@ timestamp = vancouver_time.strftime('%Y-%m-%d_%H-%M-%S')
 filename = f"{timestamp}.json"
 file_path = os.path.join("data", filename)
 
+# Create a data folder if it doesn't exist
+if not os.path.exists('data'):
+    os.makedirs('data')
+    print("Created 'data' folder.")
+
 # Dump to file
 with open(file_path, 'w') as f:
     json.dump(collected_data, f, indent=2)
