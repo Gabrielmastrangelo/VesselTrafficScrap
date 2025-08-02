@@ -9,19 +9,45 @@ from dotenv import load_dotenv
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Path to .env file
-env_path = os.path.join(BASE_DIR, '.env')
-load_dotenv(env_path)  # Load .env from the script's directory
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-url_login = "https://ppaportal.portlink.co/api/accounts/login"
+def create_authenticated_session():
+    """
+    Creates and returns a requests.Session object authenticated with a Bearer token.
 
-session = requests.Session()
+    This function:
+    - Reads user credentials (email and password) from environment variables 'EMAIL' and 'PASSWORD'.
+    - Sends a POST request to the login endpoint to authenticate.
+    - Retrieves the access token from the login response.
+    - Sets the Authorization header with the Bearer token on the session.
+    
+    Returns:
+        requests.Session: A session object with the Authorization header set for authenticated requests.
 
-payload = {
-    "email": os.getenv('EMAIL'),
-    "password": os.getenv('PASSWORD')
-}
-
-response = session.post(url_login, json=payload)
+    Raises:
+        requests.HTTPError: If the login request fails (non-2xx response).
+        ValueError: If the login response does not contain an access token.
+    """
+    url_login = "https://ppaportal.portlink.co/api/accounts/login"
+    session = requests.Session()
+    
+    payload = {
+        "email": os.getenv('EMAIL'),
+        "password": os.getenv('PASSWORD')
+    }
+    
+    response = session.post(url_login, json=payload)
+    response.raise_for_status()  # Raises HTTPError for bad requests
+    
+    access_token = response.json().get('access_token')
+    if not access_token:
+        raise ValueError("No access token found in login response")
+    
+    session.headers.update({
+        "authorization": f"Bearer {access_token}"
+    })
+    
+    return session
 
 def getDataAPI(session, url):
     '''
@@ -38,6 +64,8 @@ def getDataAPI(session, url):
     except Exception as e:
         print(f"Error fetching data from {url}: {e}")
         return None
+    
+session = create_authenticated_session()
 
 # url for the API with the job board information
 url_currentVesselTraffic = "https://ppaportal.portlink.co/api/pdams/GetCurrentVesselTraffic"
